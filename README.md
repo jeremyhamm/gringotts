@@ -1,3 +1,3 @@
 # Gringotts
 
-![Logo](https://github.com/jeremyhamm/gringotts/static/logo-lg.png)
+![Logo](https://raw.githubusercontent.com/jeremyhamm/gringotts/main/static/logo-lg.png)
