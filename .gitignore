@@ -3,3 +3,6 @@
 
 # API
 /api/node_modules
+
+# Static Files
+/static/*
