@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+      network: gringotts
+    volumes:
+      - ./api:/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    links:
+      - db
+  db:
+    container_name: db
+    image: "postgres:latest"
+    build:
+      context: .
+      network: gringotts
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_DB: gringotts
+      POSTGRES_USER: gringotts-admin
+      POSTGRES_PASSWORD: CpPuHYfFWKGp4X
+networks:
+  gringotts:
