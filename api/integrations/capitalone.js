@@ -4,6 +4,7 @@ const axios = require('axios');
 
 /**
  * Get access token from Capital One
+ * https://developer.capitalone.com/documentation/o-auth
  * 
  * @return {Promise}
  */
@@ -16,9 +17,29 @@ const authenticate = async () => {
   const headers = {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   }
-  
+
   return await axios.post('https://api-sandbox.capitalone.com/oauth2/token', data, headers);
-}
+};
+
+/**
+ * Get bank products
+ */
+const products = async () => {
+  //curl -i -k --tlsv1.2 -H "Authorization: Bearer jT7LJYpI4wLG8Q2KGHgNNiAPO84BYDpBXQyPXsksHO6g71MxwCUoOU" -H "Accept: application/json;v=5" -H "Content-Type: application/json" -d "{\"isCollapseRate\":true}" -X POST "https://api-sandbox.capitalone.com/deposits/products/~/search"
+  
+  const data = {
+    'isCollapseRate': true
+  }
+  
+  const headers = {
+    headers: {
+      'Authorization': 'Bearer',
+      'Content-Type': 'application/json'
+    }
+  };
+
+  return await axios.post('https://api-sandbox.capitalone.com/deposits/products/~/search', data, headers);
+};
 
 
 /**
@@ -34,11 +55,21 @@ router.get('/authentication', async (req, res) => {
   catch(err) {
     console.log(err);
   }
-  
 });
 
-router.get('/transactions', (req, res) => {
-  res.send('About birds')
+/**
+ * Bank products
+ */
+router.get('/products', (req, res) => {
+  const products = await products();
+  console.log(products);
+  
+  try {
+    res.sendStatus(200);
+  }
+  catch(err) {
+    console.log(err);
+  }
 });
 
 module.exports = router;
