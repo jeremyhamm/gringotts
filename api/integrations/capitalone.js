@@ -2,30 +2,39 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
-const authenticate = () => {
-  axios({
-    method: 'post',
-    url: 'https://api-sandbox.capitalone.com/oauth2/token',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
-    data: {
-      client_id: process.env.CAPITAL_ONE_CLIENT_ID,
-      client_secret: process.env.CAPITAL_ONE_CLIENT_SECRET,
-      grant_type: 'client_credentials'
-    }
-  })
-  .then((response) => {
-    console.log(response);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+/**
+ * Get access token from Capital One
+ * 
+ * @return {Promise}
+ */
+const authenticate = async () => {
+  const data = new URLSearchParams();
+  data.append('client_id', process.env.CAPITAL_ONE_CLIENT_ID);
+  data.append('client_secret', process.env.CAPITAL_ONE_CLIENT_SECRET);
+  data.append('grant_type',  'client_credentials');
+  
+  const headers = {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  }
+  
+  return await axios.post('https://api-sandbox.capitalone.com/oauth2/token', data, headers);
 }
 
 
-// define the about route
-router.get('/authentication', (req, res) => {
-  const token = authenticate();
-  console.log(token);
+/**
+ * Authenicate
+ */
+router.get('/authentication', async (req, res) => {
+  try {
+    const token = await authenticate();
+    console.log(token.data);
+
+    res.sendStatus(200);
+  }
+  catch(err) {
+    console.log(err);
+  }
+  
 });
 
 router.get('/transactions', (req, res) => {
