@@ -1,6 +1,26 @@
+const fs = require('fs');
+const path = require('path');
+const csv = require('csv-parser');
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+
+const parseCsv = (file) => {
+  const filePath = path.parse(file);
+
+  console.log(filePath);
+  
+  fs.readFileSync(new URL(file), 'utf8', (err, data) => {
+    console.log(data);
+  });
+  
+  // fs.createReadStream(file)
+  //   .pipe(csv())
+  //   .on('data', (data) => results.push(data))
+  //   .on('end', () => {
+  //     console.log(results);
+  //   });
+}
 
 /**
  * Get access token from Capital One
@@ -25,8 +45,6 @@ const authenticate = async () => {
  * Get bank products
  */
 const products = async () => {
-  //curl -i -k --tlsv1.2 -H "Authorization: Bearer jT7LJYpI4wLG8Q2KGHgNNiAPO84BYDpBXQyPXsksHO6g71MxwCUoOU" -H "Accept: application/json;v=5" -H "Content-Type: application/json" -d "{\"isCollapseRate\":true}" -X POST "https://api-sandbox.capitalone.com/deposits/products/~/search"
-  
   const data = {
     'isCollapseRate': true
   }
@@ -41,6 +59,9 @@ const products = async () => {
   return await axios.post('https://api-sandbox.capitalone.com/deposits/products/~/search', data, headers);
 };
 
+/**
+ * Routes
+ */
 
 /**
  * Authenicate
@@ -53,14 +74,14 @@ router.get('/authentication', async (req, res) => {
     res.sendStatus(200);
   }
   catch(err) {
-    console.log(err);
+    console.error(err);
   }
 });
 
 /**
  * Bank products
  */
-router.get('/products', (req, res) => {
+router.get('/products', async (req, res) => {
   const products = await products();
   console.log(products);
   
@@ -68,7 +89,22 @@ router.get('/products', (req, res) => {
     res.sendStatus(200);
   }
   catch(err) {
-    console.log(err);
+    console.error(err);
+  }
+});
+
+/**
+ * Import CSV
+ */
+router.get('/csv', async (req, res) => {
+  const file = req.query.file;
+  const csvData = await parseCsv(file);
+  
+  try {
+    res.sendStatus(200);
+  }
+  catch(err) {
+    console.error(err);
   }
 });
 

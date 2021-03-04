@@ -6,6 +6,12 @@ nuke () {
   docker system prune --all --volumes
 }
 
+# Execute docker-compose down
+down () {
+  echo "Stopping network, containers, images, and volumes..."
+  docker-compose down
+}
+
 # Execute docker-compose up
 up () {
   echo "Building network, containers, images, and volumes..."
@@ -14,7 +20,7 @@ up () {
 
 # Execute docker-compose up --build
 build () {
-  echo "Building network, containers, images, and volumes..."
+  echo "Rebuilding network, containers, images, and volumes..."
   docker-compose up --build
 }
 

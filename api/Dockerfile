@@ -1,13 +1,8 @@
 FROM node:latest
-
-RUN mkdir -p /api
-
+RUN apt-get update && \
+  mkdir -p /api
 WORKDIR /api
-
-COPY . .
-
 RUN npm install
-
+COPY . .
 EXPOSE 3000
-
 CMD ["npm", "run", "start"]

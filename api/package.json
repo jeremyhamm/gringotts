@@ -1,17 +1,21 @@
 {
-  "name": "api",
+  "name": "gringotts-api",
   "version": "1.0.0",
   "description": "Gringotts API",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "nodemon index.js -L"
   },
   "author": "Jeremy Hamm",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
+    "csv-parser": "^3.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
