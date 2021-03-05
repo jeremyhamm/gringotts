@@ -1,5 +1,6 @@
 .env
 *.code-workspace
+*.csv
 
 # API
 /api/node_modules

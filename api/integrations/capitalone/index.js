@@ -6,20 +6,15 @@ const router = express.Router();
 const axios = require('axios');
 
 const parseCsv = (file) => {
-  const filePath = path.parse(file);
-
-  console.log(filePath);
-  
-  fs.readFileSync(new URL(file), 'utf8', (err, data) => {
-    console.log(data);
+  const filePath = `/api/integrations/capitalone/csv/${file}`;
+  const transactions = [];
+  return new Promise((resolve, reject) => {
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on('error', error => reject(error))
+      .on('data', (data) => transactions.push(data))
+      .on('end', () => resolve(transactions));
   });
-  
-  // fs.createReadStream(file)
-  //   .pipe(csv())
-  //   .on('data', (data) => results.push(data))
-  //   .on('end', () => {
-  //     console.log(results);
-  //   });
 }
 
 /**
@@ -96,9 +91,11 @@ router.get('/products', async (req, res) => {
 /**
  * Import CSV
  */
-router.get('/csv', async (req, res) => {
+router.post('/csv', async (req, res) => {
   const file = req.query.file;
   const csvData = await parseCsv(file);
+
+  console.log(csvData);
   
   try {
     res.sendStatus(200);

@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const port = 3000;
-const capitaloneRoutes = require('./integrations/capitalone');
+const capitaloneRoutes = require('./integrations/capitalone/index');
 
 // Capital One
 app.use('/api/capitalone', capitaloneRoutes);
