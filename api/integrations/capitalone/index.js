@@ -1,10 +1,34 @@
 const fs = require('fs');
-const path = require('path');
 const csv = require('csv-parser');
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const db = require('../../scripts/database');
 
+/**
+ * Add transaction id to each transaction
+ * 
+ * @param {Object} transactions
+ * 
+ * @return {Object}
+ */
+const addTransactionId = (transactions) => {
+  for (const transaction of transactions) {
+    if (transaction['Transaction Date']) {
+      const transaction_id = `${transaction['Transaction Date']}${transaction.Description}${transaction.Debit}${transaction.Credit}`;
+      transaction.transaction_id = Buffer.from(transaction_id).toString('base64');
+    }
+  }
+  return transactions;
+}
+
+/**
+ * Parse transactions csv file
+ * 
+ * @param {String} file - csv file name
+ * 
+ * @return {Promise}
+ */
 const parseCsv = (file) => {
   const filePath = `/api/integrations/capitalone/csv/${file}`;
   const transactions = [];
@@ -13,8 +37,43 @@ const parseCsv = (file) => {
       .pipe(csv())
       .on('error', error => reject(error))
       .on('data', (data) => transactions.push(data))
-      .on('end', () => resolve(transactions));
+      .on('end', () => resolve(addTransactionId(transactions)));
   });
+};
+
+/**
+ * Check for existing transactions
+ * 
+ * @param {JSON} transactions 
+ */
+const checkForExistingTransactions = async (transactions) => {
+  const transactionIdArr = [];
+  for (const transaction of transactions) {
+    transactionIdArr.push(transaction.transaction_id);
+  }
+
+  const sql = db.getDBConnection();
+  return await sql`
+    select t.transaction_id
+    from transactions t
+    where t.transaction_id in (${ ['1', '2'] })
+  `
+};
+
+/**
+ * 
+ * @param {*} transactions 
+ */
+const saveTransactions = async (transactions) => {
+  const existing = await checkForExistingTransactions(transactions);
+
+  const foundArray = [];
+  for (const ext of existing) {
+    foundArray.push(ext);
+  }
+  
+  const sql = db.getDBConnection();
+  return await sql`insert into transactions ${ sql(transactions, 'transaction_id', 'Transaction Date', 'Debit', 'Credit', 'Description', 'Category')}` //where transaction_id not in (${ foundArray })
 }
 
 /**
@@ -94,8 +153,7 @@ router.get('/products', async (req, res) => {
 router.post('/csv', async (req, res) => {
   const file = req.query.file;
   const csvData = await parseCsv(file);
-
-  console.log(csvData);
+  await saveTransactions(csvData);
   
   try {
     res.sendStatus(200);
